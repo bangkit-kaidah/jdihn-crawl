@@ -6,7 +6,8 @@ import csv
 URL = 'https://jdihn.go.id/search/pusat?page='
 DIRECTORY = 'downloads/'
 OUTPUT = 'jdihn.csv'
-PAGES = 6131
+START_PAGE = 1
+END_PAGE = 6131
 
 def write_csv(tipe_dokumen, judul_dokumen, status, nomor_peraturan, jenis_peraturan, tempat_penetapan, tanggal_penetapan, tanggal_pengundangan, sumber, sumber_detail, urusan_pemerintah, bidang_hukum, bahasa, pemrakarsa, penandatangan, peraturan_terkait, dokumen_terkait, hasil_uji_mk, pengarang, subjek, file_url, file_size, link):
     with open(OUTPUT, 'a', newline='', encoding='utf-8') as f:
@@ -24,7 +25,7 @@ def main():
 
     write_csv_header()
 
-    for i in range(1, PAGES+1, 1):
+    for i in range(START_PAGE, END_PAGE+1, 1):
         url = "{}{}".format(URL, i)
         res = requests.get(url)
         
