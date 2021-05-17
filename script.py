@@ -2,30 +2,43 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import csv
+import sys
 
 URL = 'https://jdihn.go.id/search/pusat?page='
 DIRECTORY = 'downloads/'
-OUTPUT = 'jdihn.csv'
-START_PAGE = 1
-END_PAGE = 6131
 
-def write_csv(tipe_dokumen, judul_dokumen, status, nomor_peraturan, jenis_peraturan, tempat_penetapan, tanggal_penetapan, tanggal_pengundangan, sumber, sumber_detail, urusan_pemerintah, bidang_hukum, bahasa, pemrakarsa, penandatangan, peraturan_terkait, dokumen_terkait, hasil_uji_mk, pengarang, subjek, file_url, file_size, link):
-    with open(OUTPUT, 'a', newline='', encoding='utf-8') as f:
+def write_csv(output, tipe_dokumen, judul_dokumen, status, nomor_peraturan, jenis_peraturan, tempat_penetapan, tanggal_penetapan, tanggal_pengundangan, sumber, sumber_detail, urusan_pemerintah, bidang_hukum, bahasa, pemrakarsa, penandatangan, peraturan_terkait, dokumen_terkait, hasil_uji_mk, pengarang, subjek, file_url, file_size, link):
+    with open(output, 'a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow([tipe_dokumen, judul_dokumen, status, nomor_peraturan, jenis_peraturan, tempat_penetapan, tanggal_penetapan, tanggal_pengundangan, sumber, sumber_detail, urusan_pemerintah, bidang_hukum, bahasa, pemrakarsa, penandatangan, peraturan_terkait, dokumen_terkait, hasil_uji_mk, pengarang, subjek, file_url, file_size, link])
 
-def write_csv_header():
-    with open(OUTPUT, 'w', newline='', encoding='utf-8') as f:
+def write_csv_header(output):
+    with open(output, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['tipe_dokumen', 'judul_dokumen', 'status', 'nomor_peraturan', 'jenis_peraturan', 'tempat_penetapan', 'tanggal_penetapan', 'tanggal_pengundangan', 'sumber', 'sumber_detail', 'urusan_pemerintah', 'bidang_hukum', 'bahasa', 'pemrakarsa', 'penandatangan', 'peraturan_terkait', 'dokumen_terkait', 'hasil_uji_mk', 'pengarang', 'subjek', 'file_url', 'file_size', 'link'])
 
 def main():
+    try:
+        start_page = int(sys.argv[1])
+        end_page = int(sys.argv[2])
+    except:
+        print('Usage: python script.py <start_page> <end_page>')
+        return
+
+    if start_page > end_page:
+        print("Start page can't be larger than end page")
+        return
+        
     if not os.path.exists(DIRECTORY):
         os.mkdir(DIRECTORY)
 
-    write_csv_header()
+    print("Crawling JDIHN page {} to {}".format(start_page, end_page))
 
-    for i in range(START_PAGE, END_PAGE+1, 1):
+    output_filename = "jdihn_page_{}-{}.csv".format(start_page, end_page)
+    output = os.path.join(DIRECTORY, output_filename)
+    write_csv_header(output)
+
+    for i in range(start_page, end_page+1, 1):
         url = "{}{}".format(URL, i)
         res = requests.get(url)
         
@@ -70,7 +83,8 @@ def main():
                 file_size = 0
 
             print("--> Writing {} row".format(index+1))
-            write_csv(tipe_dokumen, judul_dokumen, status, nomor_peraturan, jenis_peraturan, tempat_penetapan, tanggal_penetapan, tanggal_pengundangan, sumber, sumber_detail, urusan_pemerintah, bidang_hukum, bahasa, pemrakarsa, penandatangan, peraturan_terkait, dokumen_terkait, hasil_uji_mk, pengarang, subjek, file_url, file_size, link)
+            write_csv(output, tipe_dokumen, judul_dokumen, status, nomor_peraturan, jenis_peraturan, tempat_penetapan, tanggal_penetapan, tanggal_pengundangan, sumber, sumber_detail, urusan_pemerintah, bidang_hukum, bahasa, pemrakarsa, penandatangan, peraturan_terkait, dokumen_terkait, hasil_uji_mk, pengarang, subjek, file_url, file_size, link)
+    print("Finished crawling from page {} to {}".format(start_page, end_page))
 
 if __name__ == "__main__":
     main()
