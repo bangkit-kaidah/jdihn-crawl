@@ -54,7 +54,10 @@ def main():
 
             tipe_dokumen = detail_page.select('h5')[0].get_text()
             judul_dokumen = detail_page.select('h3')[1].get_text()
-            status = detail_page.select('.btn-warning')[0].get_text()
+            try:
+                status = detail_page.select('.btn-warning')[0].get_text()
+            except:
+                status = 'No Status'
 
             ps = detail_page.select('p')
             nomor_peraturan = ps[0].get_text()
